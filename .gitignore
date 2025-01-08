@@ -1,1 +1,26 @@
+
+# Virtual Environment
 venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# SQLite
+*.sqlite3
+*.db
+
+# Testing
+.pytest_cache/
+.coverage
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment variables
+.env
