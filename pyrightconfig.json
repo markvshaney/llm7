@@ -1,0 +1,18 @@
+# llm7/pyrightconfig.json
+{
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "**/.*",
+        "**/venv",
+        "Desktop/ai_assistant",
+        "Documents/miniconda3",
+        "mistral-testing",
+        "my_project_env",
+        "source/Reach",
+        "source/repos/VAN",
+        "source/repos/llm_project"
+    ],
+    "venvPath": ".",
+    "venv": "venv"
+}
