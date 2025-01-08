@@ -1,0 +1,4 @@
+{
+  "tests/ollama/test_interface.py": true,
+  "tests/ollama/test_model_manager.py": true
+}
