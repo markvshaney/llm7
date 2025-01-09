@@ -43,7 +43,7 @@ where = ["src"]
 include = ["llm7*"]
 
 [tool.black]
-line-length = 88
+line-length = 69
 target-version = ["py312"]
 include = ".pyi?$"
 

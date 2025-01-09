@@ -1,0 +1,111 @@
+
+
+based on structure below do you have any suggestions to improve the
+creating a modular AI assistant called llm7
+C:\Users\lbhei\source\repos\llm7 is the root dir
+Stucture so far:
+tructure using escaped backslashes to properly represent the double underscores (b/cd Claude markdown bug)
+
+llm7/
+├── .git/
+├── .pytest_cache/
+│   ├── v/
+│   │   └── cache/,
+│   │       ├── lastfailed
+│   │       ├── nodeids
+│   │       └── stepwise
+│   ├── CACHEDIR.TAG
+│   └── README.md
+├── pyproject.toml
+├── .vscode/
+│   └── vscode-config.txt
+├── docs/
+│   ├── api/
+│   │   └── .gitkeep.txt            #placeholder for version tracking
+│   ├── architecture/
+│   │   └── llm7_structure.txt
+│   └── development/
+│       └── .gitkeep.txt            #placeholder for version tracking
+├── llm7.egg-info
+│   ├── dependency_links.txt
+│   ├── PKG-INFO
+│   ├── requires.txt
+│   ├── SOURCES.txt
+│   └── top_level.txt
+├── logs/
+│   └── .gitkeep.txt                #placeholder for version tracking
+├── src/
+│   └── llm7/
+│       ├── main.py
+│       ├── \_\_pycache\_\_/
+│       │   └── \_\_init\_\_.cpython-312.pyc
+│       ├── config/
+│       │   ├── \_\_init\_\_.py
+│       │   ├── config.yaml
+│       │   └── settings.py
+│       ├── memory/
+│       │   ├── memory_manager.py
+│       │   └── \_\_init\_\_.py
+│       ├── ollama/
+│       │   ├── \_\_pycache\_\_/
+│       │   │   └── \_\_init\_\_.cpython-312.pyc
+│       │   ├── \_\_init\_\_.py
+│       │   ├── exceptions.py
+│       │   ├── logger.py
+│       │   ├── ollama_model_manager.py
+│       │   ├── ollama_examples.py
+│       │   └── ollama_interface.py
+│       ├── scraper/
+│       │   ├── \_\_pycache\_\_/
+│       │   │   └── scraper.cpython-312.pyc
+│       │   ├── \_\_init\_\_.py
+│       │   └── scraper.py
+│       ├── storage/
+│       │   ├── \_\_init\_\_.py
+│       │   ├── cache/
+│       │   │   └── \_\_init\_\_.py
+│       │   ├── chroma_db/
+│       │   │   └── \_\_init\_\_.py
+│       │   └── temp/
+│       │       └── \_\_init\_\_.py
+│       ├── utils/
+│       │       ├── scripts
+│       │       └── \_\_init\_\_.py
+│       └── \_\_init\_\_.py
+├── tests/
+│   ├── \_\_pycache\_\_/
+│   │   └── scraper.cpython-312.pyc
+│   ├── memory/
+│   │   └── \_\_init\_\_.py
+│   ├── ollama/
+│   │   ├── \_\_pycache\_\_/
+│   │   │   ├── \_\_init\_\_.cpython-312.pyc
+│   │   │   ├── test_interface.cpython-312-pytest-8.3.4.pyc
+│   │   │   └── test_model_manager.cpython-312-pytest-8.3.4.pyc
+│   │   ├── \_\_init\_\_.py
+│   │   ├── test_interface.py
+│   │   └── test_model_manager.py
+│   ├── scraper/
+│   │   ├── \_\_init\_\_.py
+│   │   └── test_scraper.py
+│   └── \_\_init\_\_.py
+├── venv/
+│   ├── include/
+│   │   └── site/
+│   │       └── python3.12/
+│   │           └── greenlet/
+│   │               └── greenlet.h
+│   ├── Lib/
+│   │   └── site-packages/
+│   ├── Scripts/
+│   ├── share/
+│   │   └── man/
+│   │       └── man1/
+│   │           └── isympy.1
+│   └── pyenv.cfg
+├── .coverage
+├── .env
+├── .gitignore
+├── pyrightconfig.json
+├── README.md
+└── requirements.txt
