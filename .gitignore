@@ -1,6 +1,9 @@
 
+
 # Virtual Environment
+.venv/
 venv/
+ENV/
 
 # Python
 __pycache__/
@@ -13,8 +16,17 @@ __pycache__/
 *.db
 
 # Testing
-.pytest_cache/
+.pytest_cache/  # Ignore the correct pytest cache directory.
 .coverage
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Logs
+logs/*.log
+!logs/  # Keep the logs directory itself in the repository.
 
 # IDE specific files
 .idea/
@@ -24,3 +36,11 @@ __pycache__/
 
 # Environment variables
 .env
+
+# Cache files
+CACHEDIR.TAG
+
+# Miscellaneous
+*.log
+.DS_Store
+Thumbs.db
