@@ -5,7 +5,7 @@ import pytest
 
 from llm7.ollama.exceptions import ModelNotFoundError
 from llm7.ollama.interface import OllamaInterface
-from llm7.ollama.model_manager import model_manager
+from llm7.ollama.ollama_model_manager import model_manager
 
 
 @pytest.fixture

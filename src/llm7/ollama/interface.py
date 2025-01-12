@@ -1,6 +1,6 @@
 # src/llm7/ollama/interface.py
-from typing import Any, AsyncGenerator, Dict, List, Optional
-
+from typing import Any, AsyncGenerator, Dict, List, Optional, Union
+from .exceptions import ModelNotFoundError
 
 class OllamaInterface:
     """Interface for interacting with Ollama models."""
@@ -20,7 +20,7 @@ class OllamaInterface:
         temperature: float = 0.7,
         max_tokens: Optional[int] = None,
         stream: bool = False,
-    ) -> Union[str, AsyncGenerator[str, None]]:
+    ) -> str | AsyncGenerator[str, None]:
         """Generate text response from the model."""
         if stream:
 

@@ -1,11 +1,18 @@
+# requirements.txt
 beautifulsoup4>=4.12.3
-chromadb>=0.4.24
+chromadb>=0.6.2
 langchain>=0.1.0
 numpy>=1.26.0
-pytest>=7.0.0
-pytest-asyncio>=0.23.0
-pytest-cov>=4.1.0
+pydantic>=2.10.4
 python-dotenv>=1.0.0
 requests>=2.31.0
 sentence-transformers>=2.5.1
 tiktoken>=0.6.0
+fastapi>=0.115.6
+uvicorn>=0.34.0
+PyYAML>=6.0.2
+
+# Test dependencies
+pytest>=8.3.0
+pytest-asyncio>=0.25.0
+pytest-cov>=6.0.0

@@ -1,5 +1,3 @@
-
-
 # Virtual Environment
 .venv/
 venv/
@@ -16,8 +14,15 @@ __pycache__/
 *.db
 
 # Testing
-.pytest_cache/  # Ignore the correct pytest cache directory.
+.pytest_cache/
+.pytest__cache/
 .coverage
+htmlcov/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
 
 # Build artifacts
 build/
@@ -44,3 +49,4 @@ CACHEDIR.TAG
 *.log
 .DS_Store
 Thumbs.db
+

@@ -1,68 +1,4 @@
-# llm7/ollama/model_manager.py
-"""
-Ollama Model Manager - Manages different models and their configurations.
-
-Example Usage:
---------------
-from llm7.ollama.interface import ollama_interface
-from llm7.ollama.model_manager import model_manager
-
-# Basic generation
-response = await ollama_interface.generate("Explain how to make a cup of coffee.")
-
-# Streaming chat
-async for chunk in ollama_interface.chat("Tell me a short story about a robot.", stream=True):
-    print(chunk, end='', flush=True)
-
-# Multi-turn conversation
-response1 = await ollama_interface.chat("What are the three laws of robotics?")
-response2 = await ollama_interface.chat("Who created these laws?")
-
-# View conversation history
-for message in ollama_interface.conversation_history:
-    print(f"{message['role'].title()}: {message['content']}\n")
-
-# Switch between models
-response1 = await ollama_interface.generate("Write a function to calculate fibonacci numbers.")
-ollama_interface.switch_model('codellama')
-response2 = await ollama_interface.generate("Write a function to calculate fibonacci numbers.")
-
-# Use custom parameters
-response = await ollama_interface.generate(
-    "Brainstorm creative names for a tech startup.",
-    temperature=0.9,  # More creative
-    max_tokens=100    # Shorter response
-)
-
-# Error handling
-try:
-    ollama_interface.switch_model('non-existent-model')
-except Exception as e:
-    print("Caught error:", str(e))
-
-# Add a new model configuration
-model_manager.add_model_config('new-model', {
-    'temperature': 0.6,
-    'system_prompt': "You are a specialized AI assistant."
-})
-
-# Update existing model configuration
-model_manager.update_model_config('mistral', {
-    'temperature': 0.65
-})
-
-# Switch to a different model
-model_manager.set_current_model('codellama')
-
-# Get current model's configuration
-config = model_manager.current_config
-
-# List available models
-models = model_manager.available_models
-
-# Change global options
-model_manager.set_option('stream_response', True)
-"""
+# llm7/ollama/ollama_model_manager.py
 
 from typing import Any, Dict, Optional
 
@@ -159,3 +95,68 @@ class OllamaModelManager:
 
 # Create singleton instance
 model_manager = OllamaModelManager()
+
+"""
+Ollama Model Manager - Manages different models and their configurations.
+
+Example Usage:
+--------------
+from llm7.ollama.interface import ollama_interface
+from llm7.ollama.model_manager import model_manager
+
+# Basic generation
+response = await ollama_interface.generate("Explain how to make a cup of coffee.")
+
+# Streaming chat
+async for chunk in ollama_interface.chat("Tell me a short story about a robot.", stream=True):
+    print(chunk, end='', flush=True)
+
+# Multi-turn conversation
+response1 = await ollama_interface.chat("What are the three laws of robotics?")
+response2 = await ollama_interface.chat("Who created these laws?")
+
+# View conversation history
+for message in ollama_interface.conversation_history:
+    print(f"{message['role'].title()}: {message['content']}\n")
+
+# Switch between models
+response1 = await ollama_interface.generate("Write a function to calculate fibonacci numbers.")
+ollama_interface.switch_model('codellama')
+response2 = await ollama_interface.generate("Write a function to calculate fibonacci numbers.")
+
+# Use custom parameters
+response = await ollama_interface.generate(
+    "Brainstorm creative names for a tech startup.",
+    temperature=0.9,  # More creative
+    max_tokens=100    # Shorter response
+)
+
+# Error handling
+try:
+    ollama_interface.switch_model('non-existent-model')
+except Exception as e:
+    print("Caught error:", str(e))
+
+# Add a new model configuration
+model_manager.add_model_config('new-model', {
+    'temperature': 0.6,
+    'system_prompt': "You are a specialized AI assistant."
+})
+
+# Update existing model configuration
+model_manager.update_model_config('mistral', {
+    'temperature': 0.65
+})
+
+# Switch to a different model
+model_manager.set_current_model('codellama')
+
+# Get current model's configuration
+config = model_manager.current_config
+
+# List available models
+models = model_manager.available_models
+
+# Change global options
+model_manager.set_option('stream_response', True)
+"""

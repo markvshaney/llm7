@@ -1,13 +1,12 @@
 import asyncio
 from typing import Dict, List
 
-from llm7.model_manager import model_manager
-from llm7.ollama_config import OllamaLLM
+from llm7.ollama.ollama_model_manager import model_manager
+from llm7.ollama.ollama_config import OllamaLLM
 
 # Main module for LLM3 Assistant that interacts with LLM models, manages conversations, and processes user input.
 
-
-class LLM3Assistant:
+class OllamaAssistant:
     """Handles interaction with the LLM and manages conversation state."""
 
     def __init__(self) -> None:
@@ -71,12 +70,17 @@ class LLM3Assistant:
 
         return assistant_response
 
+def initialize_assistant(model_name: str) -> OllamaAssistant:
+    """Initialize the assistant with a specific model."""
+    assistant = OllamaAssistant()
+    assistant.switch_model(model_name)
+    return assistant
 
 async def main() -> None:
-    """Run the LLM3 Assistant and handle user interaction."""
-    assistant = LLM3Assistant()
+    """Run the Ollama Assistant and handle user interaction."""
+    assistant = OllamaAssistant()
 
-    print("LLM3 Assistant")
+    print("Ollama Assistant")
     print("-------------")
     print("Type 'help' for available commands")
     assistant.show_models()
