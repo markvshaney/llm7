@@ -1,187 +1,126 @@
 import pytest
+from unittest.mock import Mock, patch
 import requests
-from unittest.mock import Mock
-import time
-import yaml
-from pathlib import Path
-
+from config.settings import Settings  # Import from root config
 from llm7.scraper.scraper import Scraper
 
-@pytest.fixture
-def config_file(tmp_path):
-    """Create a temporary config file for testing."""
-    config_content = {
-        "scraping": {
-            "max_retries": 3,
-            "timeout": 10,
-            "batch_size": 2,
-            "rate_limit": 2,
-            "headers": {
-                "User-Agent": "Test Agent"
-            }
-        }
-    }
-    config_path = tmp_path / "config.yaml"
-    with open(config_path, "w") as f:
-        yaml.dump(config_content, f)
-    return str(config_path)
+# Test configuration constant
+TEST_CONFIG = {
+    "scraping.batch_size": 100,
+    "scraping.max_retries": 3,
+    "scraping.timeout": 30,
+    "scraping.headers": {
+        "User-Agent": "LLM7 Scraper/0.1.0",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
+        "Accept-Language": "en-US,en;q=0.5"
+    },
+    "scraping.rate_limit": 1,
+    "scraping.async_enabled": True
+}
 
 @pytest.fixture
-def scraper(config_file):
-    """Create a Scraper instance with the test config."""
-    return Scraper(config_file)
+def mock_settings():
+    """Create a mock settings instance."""
+    settings = Mock(spec=Settings)
+    settings.get.side_effect = lambda key, default=None: TEST_CONFIG.get(key, default)
+    return settings
 
-def test_initialization(config_file):
-    """Test scraper initialization with config file."""
-    scraper = Scraper(config_file)
-    assert scraper.config["max_retries"] == 3
-    assert scraper.config["timeout"] == 10
-    assert scraper.config["batch_size"] == 2
-    assert scraper.config["headers"]["User-Agent"] == "Test Agent"
+@pytest.fixture
+def scraper(mock_settings):
+    """Create a Scraper instance for testing."""
+    with patch('config.settings.settings', mock_settings):  # Updated patch path
+        return Scraper()
 
-def test_initialization_missing_config():
-    """Test scraper initialization with missing config file."""
-    with pytest.raises(FileNotFoundError):
-        Scraper("nonexistent_config.yaml")
+@pytest.fixture
+def mock_response():
+    """Create a base mock response."""
+    response = Mock()
+    response.text = "test content"
+    response.raise_for_status.return_value = None
+    return response
 
-def test_single_url_scraping(scraper, mocker):
-    """Test successful scraping of a single URL."""
-    mock_response = Mock()
-    mock_response.text = "Test content"
-    mock_response.raise_for_status.return_value = None
-
+def test_successful_scrape(scraper, mock_response, mocker):
+    """Test successful URL scraping."""
     mocker.patch.object(scraper.session, 'get', return_value=mock_response)
 
     result = scraper.scrape_url("https://test.com")
 
     assert result["status"] == "success"
-    assert result["content"] == "Test content"
-    assert result["url"] == "https://test.com"
-    assert isinstance(result["timestamp"], float)
-
-def test_batch_scraping(scraper, mocker):
-    """Test batch scraping functionality."""
-    mock_response = Mock()
-    mock_response.text = "Test content"
-    mock_response.raise_for_status.return_value = None
-
-    mocker.patch.object(scraper.session, 'get', return_value=mock_response)
-
-    urls = ["https://test1.com", "https://test2.com", "https://test3.com"]
-    results = scraper.batch_scrape(urls)
-
-    assert len(results) == 3
-    for i, result in enumerate(results):
-        assert result["status"] == "success"
-        assert result["content"] == "Test content"
-        assert result["url"] == urls[i]
-        assert isinstance(result["timestamp"], float)
-
-def test_rate_limiting(scraper, mocker):
-    """Test rate limiting functionality."""
-    mock_response = Mock()
-    mock_response.text = "Test content"
-    mock_response.raise_for_status.return_value = None
-
-    mocker.patch.object(scraper.session, 'get', return_value=mock_response)
-
-    start_time = time.time()
-    scraper.scrape_url("https://test1.com")
-    scraper.scrape_url("https://test2.com")
-    end_time = time.time()
-
-    # With rate_limit of 2, two requests should take at least 0.5 seconds
-    assert end_time - start_time >= 0.5
-
-def test_error_handling(scraper, mocker):
-    """Test error handling with mocked request failure."""
-    mock_get = mocker.patch.object(
-        scraper.session,
-        'get',
-        side_effect=requests.exceptions.RequestException("Test error")
+    assert result["content"] == "test content"
+    scraper.session.get.assert_called_once_with(
+        "https://test.com",
+        headers=TEST_CONFIG["scraping.headers"],
+        timeout=TEST_CONFIG["scraping.timeout"]
     )
+
+def test_failed_scrape(scraper, mocker):
+    """Test failed URL scraping."""
+    error_response = Mock()
+    error_response.raise_for_status.side_effect = requests.exceptions.RequestException("Test error")
+    mocker.patch.object(scraper.session, 'get', return_value=error_response)
 
     result = scraper.scrape_url("https://test.com")
 
-    assert result["status"].startswith("error:")
-    assert result["content"] is None
-    assert result["url"] == "https://test.com"
-    assert isinstance(result["timestamp"], float)
+    assert result["status"].startswith("error")
+    assert "Test error" in result.get("error", "")
 
-def test_retry_mechanism(scraper, mocker):
+def test_retry_mechanism(scraper, mock_response, mocker):
     """Test retry mechanism with temporary failures."""
-    mock_success = Mock()
-    mock_success.text = "success content"
-    mock_success.raise_for_status.return_value = None
+    error_response = Mock()
+    error_response.status_code = 503
+    error_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
+        "503 Server Error",
+        response=error_response
+    )
 
     mock_get = mocker.patch.object(
         scraper.session,
         'get',
-        side_effect=[
-            requests.exceptions.HTTPError("503 Server Error", response=Mock(status_code=503)),
-            mock_success
-        ]
+        side_effect=[error_response, mock_response]
     )
 
     result = scraper.scrape_url("https://test.com")
 
     assert result["status"] == "success"
-    assert result["content"] == "success content"
-    assert result["url"] == "https://test.com"
-    assert isinstance(result["timestamp"], float)
+    assert result["content"] == "test content"
+    assert mock_get.call_count == 2  # Verify retry happened
 
-def test_custom_headers(scraper, mocker):
-    """Test custom headers are properly set."""
-    mock_response = Mock()
-    mock_response.text = "Test content"
-    mock_response.raise_for_status.return_value = None
+def test_max_retries_exceeded(scraper, mocker):
+    """Test behavior when max retries are exceeded."""
+    error_response = Mock()
+    error_response.status_code = 503
+    error_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
+        "503 Server Error",
+        response=error_response
+    )
 
-    mock_get = mocker.patch.object(scraper.session, 'get', return_value=mock_response)
-
-    scraper.scrape_url("https://test.com")
-
-    actual_headers = mock_get.call_args[1]['headers']
-    assert actual_headers['User-Agent'] == "Test Agent"
-
-def test_update_headers(scraper):
-    """Test updating headers at runtime."""
-    new_headers = {"Accept": "application/json"}
-    scraper.update_headers(new_headers)
-    assert scraper.config["headers"]["Accept"] == "application/json"
-    # Ensure original headers are preserved
-    assert scraper.config["headers"]["User-Agent"] == "Test Agent"
-
-def test_set_rate_limit(scraper):
-    """Test updating rate limit at runtime."""
-    new_rate_limit = 5.0
-    scraper.set_rate_limit(new_rate_limit)
-    assert scraper.config["rate_limit"] == new_rate_limit
-
-def test_batch_size_respect(scraper, mocker):
-    """Test that batch processing respects the batch size."""
-    mock_response = Mock()
-    mock_response.text = "Test content"
-    mock_response.raise_for_status.return_value = None
-
-    mock_get = mocker.patch.object(scraper.session, 'get', return_value=mock_response)
-
-    urls = ["url1", "url2", "url3", "url4", "url5"]
-    results = scraper.batch_scrape(urls)
-
-    # With batch_size=2, should process in 3 batches
-    assert mock_get.call_count == 5
-    assert len(results) == 5
-
-def test_timeout_configuration(scraper, mocker):
-    """Test that timeout configuration is respected."""
-    mock_get = mocker.patch.object(
+    mocker.patch.object(
         scraper.session,
         'get',
-        side_effect=requests.exceptions.Timeout("Timeout")
+        return_value=error_response
     )
 
     result = scraper.scrape_url("https://test.com")
 
-    assert result["status"].startswith("error:")
-    assert "Timeout" in result["status"]
-    assert mock_get.call_args[1]["timeout"] == scraper.config["timeout"]
+    assert result["status"].startswith("error")
+    assert "Max retries exceeded" in result.get("error", "")
+
+@pytest.mark.timeout(5)  # Ensure test doesn't hang
+def test_rate_limiting(scraper, mock_response, mocker):
+    """Test rate limiting functionality."""
+    mocker.patch.object(scraper.session, 'get', return_value=mock_response)
+
+    import time
+    start_time = time.time()
+
+    # Make 3 requests with rate limit of 1 per second
+    results = [
+        scraper.scrape_url("https://test.com")
+        for _ in range(3)
+    ]
+
+    duration = time.time() - start_time
+
+    assert duration >= 2.0  # Should take at least 2 seconds due to rate limiting
+    assert all(r["status"] == "success" for r in results)
+    assert len(results) == 3

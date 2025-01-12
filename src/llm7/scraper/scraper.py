@@ -33,17 +33,11 @@ class Scraper:
 
         # Setup session with retries
         self.session = requests.Session()
-        retries = Retry(
-            total=self.config["max_retries"],
-            backoff_factor=0.5,
-            status_forcelist=[500, 502, 503, 504],
-            allowed_methods=["GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "TRACE"]
-        )
 
-        # Mount adapters for both HTTP and HTTPS
-        adapter = HTTPAdapter(max_retries=retries)
-        self.session.mount("http://", adapter)
-        self.session.mount("https://", adapter)
+        # Note: We're not using the retry adapter anymore since we're handling retries manually
+        # This allows for more fine-grained control and better test verification
+        self.session.mount("http://", HTTPAdapter())
+        self.session.mount("https://", HTTPAdapter())
 
         # Initialize rate limiting
         self.last_request_time = 0
@@ -70,7 +64,7 @@ class Scraper:
 
     def scrape_url(self, url: str) -> Dict:
         """
-        Scrape content from a single URL with error handling.
+        Scrape content from a single URL with error handling and retries.
 
         Args:
             url: The URL to scrape
@@ -82,30 +76,41 @@ class Scraper:
                 - status: 'success' or error message
                 - timestamp: Unix timestamp of the request
         """
-        self._respect_rate_limit()
+        max_retries = self.config["max_retries"]
+        current_try = 0
 
-        try:
-            response = self.session.get(
-                url,
-                timeout=self.config["timeout"],
-                headers=self.config.get("headers", {}),
-            )
-            response.raise_for_status()
+        while current_try <= max_retries:
+            self._respect_rate_limit()
 
-            return {
-                "url": url,
-                "content": response.text,
-                "status": "success",
-                "timestamp": time.time(),
-            }
+            try:
+                response = self.session.get(
+                    url,
+                    timeout=self.config["timeout"],
+                    headers=self.config.get("headers", {}),
+                )
+                response.raise_for_status()
 
-        except requests.exceptions.RequestException as e:
-            return {
-                "url": url,
-                "content": None,
-                "status": f"error: {str(e)}",
-                "timestamp": time.time(),
-            }
+                return {
+                    "url": url,
+                    "content": response.text,
+                    "status": "success",
+                    "timestamp": time.time(),
+                }
+
+            except requests.exceptions.RequestException as e:
+                current_try += 1
+                if current_try <= max_retries:
+                    # Only sleep if we're going to retry
+                    time.sleep(0.5 * (2 ** (current_try - 1)))  # exponential backoff
+                    continue
+
+                # If we've exhausted all retries, return error
+                return {
+                    "url": url,
+                    "content": None,
+                    "status": f"error: {str(e)}",
+                    "timestamp": time.time(),
+                }
 
     def batch_scrape(self, urls: List[str]) -> List[Dict]:
         """

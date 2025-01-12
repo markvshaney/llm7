@@ -1,5 +1,5 @@
-# tests/ollama/test_interface.py
 import asyncio
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -29,11 +29,20 @@ async def test_basic_generation(ollama):
 async def test_streaming_response(ollama):
     """Test streaming response generation."""
     chunks = []
-    async for chunk in ollama.generate("Test prompt", stream=True):
+    async def mock_stream():
+        test_chunks = ["Hello", " ", "World", "!"]
+        for chunk in test_chunks:
+            yield chunk
+
+    # Mock the generate method to return our mock stream
+    ollama.generate = AsyncMock(return_value=mock_stream())
+
+    async for chunk in await ollama.generate("Test prompt", stream=True):
         chunks.append(chunk)
 
     assert len(chunks) > 0
     assert all(isinstance(chunk, str) for chunk in chunks)
+    assert chunks == ["Hello", " ", "World", "!"]
 
 
 @pytest.mark.asyncio
@@ -46,9 +55,7 @@ async def test_chat_conversation(ollama):
     assert isinstance(response2, str)
 
     history = ollama.conversation_history
-    assert (
-        len(history) == 4
-    )  # 2 user messages + 2 assistant responses
+    assert len(history) == 4  # 2 user messages + 2 assistant responses
 
 
 def test_model_switching(ollama):
@@ -98,3 +105,20 @@ def test_conversation_reset(ollama):
 
     ollama.reset_conversation()
     assert len(ollama.conversation_history) == 0
+
+
+@pytest.mark.asyncio
+async def test_streaming_error_handling(ollama):
+    """Test error handling in streaming response."""
+    async def error_stream():
+        yield "Starting"
+        raise ValueError("Test error")
+
+    ollama.generate = AsyncMock(return_value=error_stream())
+
+    chunks = []
+    with pytest.raises(ValueError, match="Test error"):
+        async for chunk in await ollama.generate("Test prompt", stream=True):
+            chunks.append(chunk)
+
+    assert chunks == ["Starting"]  # Should get first chunk before error

@@ -30,6 +30,7 @@ dev = [
     "black",
     "flake8>=7.0.0",
     "mypy",
+    "pytest-asyncio>=0.23.5",
     "pytest>=8.0.0",
     "pytest-cov",
     "coverage>=7.6.10",
@@ -51,7 +52,11 @@ include = ".pyi?$"
 minversion = "6.0"
 addopts = "-ra -q --cov=llm7"
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = [
+    ".",     # Root directory first
+    "src"    # Then src directory
+]
+asyncio_mode = "auto"  # Add this for pytest-asyncio
 
 [tool.mypy]
 python_version = "3.12"

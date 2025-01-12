@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, Optional
 
-from ..config.settings import settings
+from config.settings import settings  # Direct import from root instead of relative import
 
 
 class OllamaModelManager:
