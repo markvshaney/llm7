@@ -1,19 +1,22 @@
-Test Run: 2025-01-12 00:45:24
+Test Run: 2025-01-12 01:55:30
 
 === Pytest Summary ===
 
 Summary:
-ERROR tests/ollama/test_interface.py
-ERROR tests/ollama/test_model_manager.py
-ERROR tests/scraper/test_scraper.py
-ERROR tests/test_main.py
-!!!!!!!!!!!!!!!!!!! Interrupted: 4 errors during collection !!!!!!!!!!!!!!!!!!!
+FAILED tests/ollama/test_model_manager.py::TestModelManager::test_add_model_config
+FAILED tests/ollama/test_model_manager.py::TestModelManager::test_model_switching
+FAILED tests/ollama/test_model_manager.py::TestModelManager::test_model_config_validation[invalid_config0]
+FAILED tests/ollama/test_model_manager.py::TestModelManager::test_model_config_validation[invalid_config1]
+FAILED tests/ollama/test_model_manager.py::TestModelManager::test_model_config_validation[invalid_config2]
+FAILED tests/ollama/test_model_manager.py::TestModelManager::test_model_config_validation[invalid_config3]
+FAILED tests/ollama/test_model_manager.py::TestModelManager::test_get_nonexistent_model_config
+FAILED tests/scraper/test_scraper.py::test_failed_scrape - AssertionError: as...
+FAILED tests/scraper/test_scraper.py::test_max_retries_exceeded - AssertionEr...
 
 
-Errors:
-- _______________ ERROR collecting tests/ollama/test_interface.py _______________
-- ImportError while importing test module 'C:\Users\lbhei\source\repos\llm7\tests\ollama\test_model_manager.py'.
-- ImportError while importing test module 'C:\Users\lbhei\source\repos\llm7\tests\scraper\test_scraper.py'.
-- ImportError while importing test module 'C:\Users\lbhei\source\repos\llm7\tests\test_main.py'.
-- ERROR tests/ollama/test_model_manager.py
-- ERROR tests/test_main.py
+Failures:
+- FAILED tests/ollama/test_model_manager.py::TestModelManager::test_model_switching
+- FAILED tests/ollama/test_model_manager.py::TestModelManager::test_model_config_validation[invalid_config1]
+- FAILED tests/ollama/test_model_manager.py::TestModelManager::test_model_config_validation[invalid_config3]
+- FAILED tests/scraper/test_scraper.py::test_failed_scrape - AssertionError: as...
+- ================== 9 failed, 16 passed, 1 warning in 11.38s ===================

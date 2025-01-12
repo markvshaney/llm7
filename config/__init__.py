@@ -1,4 +1,4 @@
 # config/__init__.py
-from .settings import settings
+from .settings import Settings, settings
 
-__all__ = ["settings"]
+__all__ = ['Settings', 'settings']

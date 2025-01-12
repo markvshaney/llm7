@@ -41,12 +41,19 @@ def mock_response():
 
 def test_successful_scrape(scraper, mock_response, mocker):
     """Test successful URL scraping."""
+        # Setup mock response with exact properties
+    mock_response.text = "test content"
+    mock_response.status_code = 200
+
     mocker.patch.object(scraper.session, 'get', return_value=mock_response)
 
     result = scraper.scrape_url("https://test.com")
 
     assert result["status"] == "success"
     assert result["content"] == "test content"
+    assert "url" in result
+    assert "timestamp" in result
+
     scraper.session.get.assert_called_once_with(
         "https://test.com",
         headers=TEST_CONFIG["scraping.headers"],
